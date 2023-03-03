@@ -13,7 +13,7 @@ function fetchRamens(){
 
     let mainName = document.querySelector('.name');
 
-    let mainRestaurant = document.querySelector('restaurant');
+    let mainRestaurant = document.querySelector('.restaurant');
 
     let mainRating = document.querySelector('#rating-display');
 
