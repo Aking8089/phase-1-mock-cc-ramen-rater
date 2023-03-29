@@ -1,58 +1,68 @@
 // Get Data
-function fetchRamens(){
-    fetch (`http://localhost:3000/ramens`)
-    .then (response => response.json())
-     .then(allRamens=> allRamens.forEach(renderRamens))
+const ramenMenu = document.getElementById("ramen-menu");
+const detailImg = document.querySelector("#ramen-detail img");
+
+fetch("http://localhost:3000/ramens")
+  .then((response) => response.json())
+  .then((ramenArray) => {
+    ramenArray.forEach((ramen) => {
+      appendRamenToMenu(ramen);
+    });
+  });
+
+function appendRamenToMenu(ramenObj) {
+  const div = document.createElement("div");
+  const imageDomElement = document.createElement("img");
+  const deleteBtn = document.createElement("button");
+
+  imageDomElement.src = ramenObj.image;
+  imageDomElement.addEventListener("click", () => {
+    detailImg.src = ramenObj.image;
+    document.querySelector("#ramen-detail .name").textContent = ramenObj.name;
+    document.querySelector("#ramen-detail .restaurant").textContent =
+      ramenObj.restaurant;
+    document.querySelector("#rating-display").textContent = ramenObj.rating;
+    document.querySelector("#comment-display").textContent = ramenObj.comment;
+  });
+
+  deleteBtn.textContent = "delete";
+  deleteBtn.addEventListener("click", () => {
+    fetch(`http://localhost:3000/ramens/${ramenObj.id}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+    }).then(() => {
+      div.remove();
+    });
+  });
+
+  div.append(imageDomElement, deleteBtn);
+  ramenMenu.append(div);
 }
 
-    // DOM SELECTORS
-   
-    let menuDiv = document.querySelector('#ramen-menu');
+const form = document.querySelector("#new-ramen");
+form.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const newRamenName = event.target.name.value;
+  const newRestaurant = event.target["new-restaurant"].value;
+  const newImage = event.target["new-image"].value;
+  const newRating = event.target["new-rating"].value;
+  const newComment = event.target["new-comment"].value;
+  const newRamen = {
+    name: newRamenName,
+    restaurant: newRestaurant,
+    image: newImage,
+    rating: newRating,
+    comment: newComment,
+  };
 
-    let mainImg = document.querySelector('.detail-image');
-
-    let mainName = document.querySelector('.name');
-
-    let mainRestaurant = document.querySelector('.restaurant');
-
-    let mainRating = document.querySelector('#rating-display');
-
-    let mainComment = document.querySelector('#comment-display');
-
-    let formRamen = document.querySelector('#new-ramen')
-
-    // Rendering function
-    function renderRamens (allRamens){
-        let ramenImg = document.createElement(`img`);
-       ramenImg.src = allRamens.image;
-       menuDiv.append(ramenImg);
-       ramenImg.addEventListener('click', ()=>{
-        mainImg.src = allRamens.image;
-        mainName.textContent = allRamens.name;
-        mainRestaurant.textContent = allRamens.restaurant;
-        mainRating.textContent=allRamens.rating;
-        mainComment.textContent=allRamens.comment;
-       })
-
-       }
-    
-       formRamen.addEventListener('submit', (e)=>{
-        e.preventDefault()
-        const name = e.target.name.value;
-        const restaurant = e.target.restaurant.value;
-        const image = e.target.image.value;
-        const rating = e.target.rating.value;
-        const comment = e.target['new-comment'].value;
-        let newRamen = {
-            name,
-            restaurant,
-            image,
-            rating,
-            comment,
-
-        }
-       renderRamens(newRamen)
-    })
- fetchRamens()
-
-    
+  fetch("http://localhost:3000/ramens", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(newRamen),
+  })
+    .then((response) => response.json())
+    .then((ramen) => {
+      appendRamenToMenu(ramen);
+      event.target.reset();
+    });
+});
